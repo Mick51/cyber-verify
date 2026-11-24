@@ -482,7 +482,6 @@
 
     <footer class="footer">
       <div id="t-footer">Propulsé par Cyber Charging Experience</div>
-      <!-- Remplace l'URL ci-dessous par le lien Google Play de ton application -->
       <a
         id="t-play-link"
         class="play-link"
@@ -496,11 +495,8 @@
   </div>
 
   <script>
-    // =========================================================================
-    // CONFIGURATION SUPABASE (Copie les 2 constantes depuis SupabaseManager.kt)
-    // =========================================================================
-    const SUPABASE_URL = "VOTRE_SUPABASE_URL";          // ex: "https://xxxxxxxx.supabase.co"
-    const SUPABASE_ANON_KEY = "VOTRE_SUPABASE_ANON_KEY"; // clé publique anon (sb_publishable / eyJ...)
+    const SUPABASE_URL = "https://ygijvhrbecskkjxnyqvs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_-JlCNu0adZgHWYMd6JGHpg_K1QHvV_I";
 
     const isFr = (navigator.language || "fr").toLowerCase().startsWith("fr");
     const i18n = isFr ? {
@@ -525,8 +521,6 @@
       noAudit: "Audit matériel non effectué lors de l'export",
       notFoundTitle: "Certificat introuvable",
       notFoundDesc: "Aucun certificat officiel ne correspond à cet identifiant. L'image a peut-être été modifiée ou générée hors ligne.",
-      configTitle: "Configuration Supabase requise",
-      configDesc: "Renseignez SUPABASE_URL et SUPABASE_ANON_KEY dans index.html avant publication.",
       netErrorTitle: "Erreur de connexion",
       netErrorDesc: "Impossible de joindre le serveur de vérification. Réessayez dans quelques instants.",
       invalidIdTitle: "Identifiant invalide",
@@ -553,15 +547,12 @@
       noAudit: "Hardware audit was not recorded at export time",
       notFoundTitle: "Certificate Not Found",
       notFoundDesc: "No official certificate matches this ID. The image may have been altered or generated offline.",
-      configTitle: "Supabase Configuration Required",
-      configDesc: "Set SUPABASE_URL and SUPABASE_ANON_KEY inside index.html before publishing.",
       netErrorTitle: "Connection Error",
       netErrorDesc: "Unable to reach the verification server. Please try again shortly.",
       invalidIdTitle: "Invalid Certificate ID",
       invalidIdDesc: "Please enter a valid 8-character alphanumeric certificate ID."
     };
 
-    // Apply static translations
     document.documentElement.lang = isFr ? "fr" : "en";
     document.title = `Cyber Doctor — ${i18n.title}`;
     document.getElementById("t-title").textContent = i18n.title;
@@ -654,11 +645,6 @@
         return;
       }
 
-      if (SUPABASE_URL.includes("VOTRE_") || SUPABASE_ANON_KEY.includes("VOTRE_")) {
-        showError(i18n.configTitle, i18n.configDesc, true);
-        return;
-      }
-
       errorCard.classList.add("hidden");
       resultCard.classList.add("hidden");
       loadingCard.classList.remove("hidden");
@@ -666,14 +652,15 @@
       try {
         const cleanUrl = SUPABASE_URL.replace(/\/+$/, "");
         const endpoint = `${cleanUrl}/rest/v1/resale_certificates?cert_id=eq.${encodeURIComponent(certId)}&select=*&limit=1`;
-        const resp = await fetch(endpoint, {
-          method: "GET",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Accept": "application/json"
-          }
-        });
+        const headers = {
+          "apikey": SUPABASE_ANON_KEY,
+          "Accept": "application/json"
+        };
+        if (SUPABASE_ANON_KEY.startsWith("eyJ")) {
+          headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
+        }
+
+        const resp = await fetch(endpoint, { method: "GET", headers });
 
         if (!resp.ok) {
           throw new Error(`HTTP ${resp.status}`);
@@ -703,7 +690,6 @@
       }
     });
 
-    // Auto-verify when opened via QR Code (?id=XXXXXXXX)
     const params = new URLSearchParams(window.location.search);
     const initialId = params.get("id");
     if (initialId) {
