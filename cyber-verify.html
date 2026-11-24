@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cyber Doctor — Vérification de Certificat</title>
+  <meta name="theme-color" content="#0C061A" />
+  <style>
+    :root {
+      --bg: #0C061A;
+      --card: #140824;
+      --card-elevated: #1B0A33;
+      --cyan: #00E5FF;
+      --purple: #8A00FF;
+      --green: #00E676;
+      --orange: #FF9800;
+      --red: #FF5252;
+      --text: #FFFFFF;
+      --muted: #B0A8C2;
+      --border: rgba(0, 229, 255, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: radial-gradient(circle at top, #1D0B3A 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 14px 36px;
+      line-height: 1.45;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 8px 4px 4px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: var(--card-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+    }
+
+    .search-box button {
+      background: linear-gradient(135deg, var(--purple), #6200EA);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    .search-box button:hover {
+      opacity: 0.9;
+    }
+
+    .status-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+
+    .status-banner.valid {
+      background: rgba(0, 230, 118, 0.12);
+      border: 1px solid rgba(0, 230, 118, 0.45);
+      color: var(--green);
+    }
+
+    .status-banner.invalid {
+      background: rgba(255, 82, 82, 0.12);
+      border: 1px solid rgba(255, 82, 82, 0.45);
+      color: var(--red);
+    }
+
+    .status-banner.warning {
+      background: rgba(255, 152, 0, 0.12);
+      border: 1px solid rgba(255, 152, 0, 0.45);
+      color: var(--orange);
+    }
+
+    .status-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .status-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .device-block {
+      background: var(--card-elevated);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .device-name {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .device-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .cert-pill {
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: var(--cyan);
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .health-hero {
+      text-align: center;
+      padding: 18px 12px;
+      margin-top: 14px;
+      background: linear-gradient(180deg, rgba(138, 0, 255, 0.16), rgba(27, 10, 51, 0.8));
+      border: 1px solid rgba(138, 0, 255, 0.35);
+      border-radius: 16px;
+    }
+
+    .health-value {
+      font-size: 46px;
+      font-weight: 900;
+      color: var(--green);
+      line-height: 1.05;
+    }
+
+    .health-label {
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 700;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      transition: width 0.5s ease;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .metric {
+      background: var(--card-elevated);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+    }
+
+    .metric-val {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 4px;
+      color: var(--text);
+    }
+
+    .metric-val.cyan { color: var(--cyan); }
+    .metric-val.orange { color: var(--orange); }
+
+    .audit-box {
+      background: var(--card-elevated);
+      border-radius: 12px;
+      padding: 13px;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .audit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seal-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .seal-badge.ok {
+      background: rgba(0, 230, 118, 0.16);
+      color: var(--green);
+    }
+
+    .seal-badge.warn {
+      background: rgba(255, 152, 0, 0.16);
+      color: var(--orange);
+    }
+
+    .audit-summary {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ECE7F6;
+    }
+
+    .hash-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .hash-box strong {
+      color: var(--cyan);
+      display: block;
+      margin-bottom: 3px;
+      font-family: inherit;
+    }
+
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 28px 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(0, 229, 255, 0.2);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .play-link {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .play-link:hover {
+      background: rgba(0, 229, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand">⚡ CYBER DOCTOR • VERIFY</div>
+      <h1 id="t-title">Vérification de Certificat</h1>
+      <p id="t-subtitle">Contrôle d'authenticité officiel pour revente smartphone</p>
+    </header>
+
+    <section class="card">
+      <form id="search-form" class="search-box">
+        <input
+          id="cert-input"
+          type="text"
+          maxlength="16"
+          placeholder="ID (ex: A7F3C91B)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="t-btn" type="submit">Vérifier</button>
+      </form>
+    </section>
+
+    <section id="loading-card" class="card hidden">
+      <div class="loader">
+        <div class="spinner"></div>
+        <span id="t-loading">Vérification cryptographique en cours...</span>
+      </div>
+    </section>
+
+    <section id="error-card" class="card hidden">
+      <div id="error-banner" class="status-banner invalid">
+        <div class="status-icon">⚠️</div>
+        <div>
+          <div id="error-title">Certificat introuvable</div>
+          <div id="error-desc" class="status-sub"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="result-card" class="card hidden">
+      <div class="status-banner valid">
+        <div class="status-icon">🛡️</div>
+        <div>
+          <div id="t-valid-title">Certificat Authentique Vérifié</div>
+          <div id="t-valid-sub" class="status-sub">Comparez ces données officielles avec l'image reçue</div>
+        </div>
+      </div>
+
+      <div class="device-block">
+        <div>
+          <div id="res-device" class="device-name">—</div>
+          <div id="res-date" class="device-date">—</div>
+        </div>
+        <div id="res-id" class="cert-pill">ID: —</div>
+      </div>
+
+      <div class="health-hero">
+        <div id="res-health" class="health-value">—%</div>
+        <div id="t-health-label" class="health-label">Santé Batterie Certifiée</div>
+        <div class="bar-track">
+          <div id="res-health-bar" class="bar-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="metric">
+          <div id="t-cap-label" class="metric-label">Capacité mesurée</div>
+          <div id="res-cap" class="metric-val cyan">—</div>
+        </div>
+        <div class="metric">
+          <div id="t-cycles-label" class="metric-label">Cycles batterie</div>
+          <div id="res-cycles" class="metric-val">—</div>
+        </div>
+        <div class="metric">
+          <div id="t-res-label" class="metric-label">Résistance interne</div>
+          <div id="res-ohm" class="metric-val orange">—</div>
+        </div>
+        <div class="metric">
+          <div id="t-factory-label" class="metric-label">Capacité usine</div>
+          <div id="res-factory" class="metric-val">—</div>
+        </div>
+      </div>
+
+      <div class="audit-box">
+        <div class="audit-header">
+          <span id="t-audit-label" class="metric-label">Audit Matériel & Étanchéité</span>
+          <span id="res-seal-badge" class="seal-badge ok">—</span>
+        </div>
+        <div id="res-audit" class="audit-summary">—</div>
+      </div>
+
+      <div class="hash-box">
+        <strong id="t-hash-label">Empreinte SHA-256 :</strong>
+        <span id="res-hash">—</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div id="t-footer">Propulsé par Cyber Charging Experience</div>
+      <!-- Remplace l'URL ci-dessous par le lien Google Play de ton application -->
+      <a
+        id="t-play-link"
+        class="play-link"
+        href="https://play.google.com/store/apps/details?id=com.naudclick.cybercharging"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Découvrir Cyber Charging Experience sur Google Play
+      </a>
+    </footer>
+  </div>
+
+  <script>
+    // =========================================================================
+    // CONFIGURATION SUPABASE (Copie les 2 constantes depuis SupabaseManager.kt)
+    // =========================================================================
+    const SUPABASE_URL = "VOTRE_SUPABASE_URL";          // ex: "https://xxxxxxxx.supabase.co"
+    const SUPABASE_ANON_KEY = "VOTRE_SUPABASE_ANON_KEY"; // clé publique anon (sb_publishable / eyJ...)
+
+    const isFr = (navigator.language || "fr").toLowerCase().startsWith("fr");
+    const i18n = isFr ? {
+      title: "Vérification de Certificat",
+      subtitle: "Contrôle d'authenticité officiel pour revente smartphone",
+      btn: "Vérifier",
+      loading: "Vérification cryptographique en cours...",
+      validTitle: "Certificat Authentique Vérifié",
+      validSub: "Comparez ces valeurs avec l'image partagée par le vendeur",
+      healthLabel: "Santé Batterie Certifiée",
+      capLabel: "Capacité mesurée",
+      cyclesLabel: "Cycles batterie",
+      resLabel: "Résistance interne",
+      factoryLabel: "Capacité usine",
+      auditLabel: "Audit Matériel & Étanchéité",
+      hashLabel: "Empreinte SHA-256 :",
+      footer: "Propulsé par Cyber Charging Experience",
+      playLink: "Découvrir Cyber Charging Experience sur Google Play",
+      testedOn: "Testé le",
+      sealOk: "Intégrité / Joint vérifié",
+      sealWarn: "Étanchéité non confirmée",
+      noAudit: "Audit matériel non effectué lors de l'export",
+      notFoundTitle: "Certificat introuvable",
+      notFoundDesc: "Aucun certificat officiel ne correspond à cet identifiant. L'image a peut-être été modifiée ou générée hors ligne.",
+      configTitle: "Configuration Supabase requise",
+      configDesc: "Renseignez SUPABASE_URL et SUPABASE_ANON_KEY dans index.html avant publication.",
+      netErrorTitle: "Erreur de connexion",
+      netErrorDesc: "Impossible de joindre le serveur de vérification. Réessayez dans quelques instants.",
+      invalidIdTitle: "Identifiant invalide",
+      invalidIdDesc: "Saisissez un code de certificat valide (8 caractères alphanumériques)."
+    } : {
+      title: "Certificate Verification",
+      subtitle: "Official authenticity check for smartphone resale",
+      btn: "Verify",
+      loading: "Running cryptographic verification...",
+      validTitle: "Authentic Certificate Verified",
+      validSub: "Compare these official records with the seller's screenshot",
+      healthLabel: "Certified Battery Health",
+      capLabel: "Measured Capacity",
+      cyclesLabel: "Battery Cycles",
+      resLabel: "Internal Resistance",
+      factoryLabel: "Factory Capacity",
+      auditLabel: "Hardware & Seal Audit",
+      hashLabel: "SHA-256 Fingerprint:",
+      footer: "Powered by Cyber Charging Experience",
+      playLink: "Get Cyber Charging Experience on Google Play",
+      testedOn: "Tested on",
+      sealOk: "Integrity / Seal Verified",
+      sealWarn: "Seal Not Confirmed",
+      noAudit: "Hardware audit was not recorded at export time",
+      notFoundTitle: "Certificate Not Found",
+      notFoundDesc: "No official certificate matches this ID. The image may have been altered or generated offline.",
+      configTitle: "Supabase Configuration Required",
+      configDesc: "Set SUPABASE_URL and SUPABASE_ANON_KEY inside index.html before publishing.",
+      netErrorTitle: "Connection Error",
+      netErrorDesc: "Unable to reach the verification server. Please try again shortly.",
+      invalidIdTitle: "Invalid Certificate ID",
+      invalidIdDesc: "Please enter a valid 8-character alphanumeric certificate ID."
+    };
+
+    // Apply static translations
+    document.documentElement.lang = isFr ? "fr" : "en";
+    document.title = `Cyber Doctor — ${i18n.title}`;
+    document.getElementById("t-title").textContent = i18n.title;
+    document.getElementById("t-subtitle").textContent = i18n.subtitle;
+    document.getElementById("t-btn").textContent = i18n.btn;
+    document.getElementById("t-loading").textContent = i18n.loading;
+    document.getElementById("t-valid-title").textContent = i18n.validTitle;
+    document.getElementById("t-valid-sub").textContent = i18n.validSub;
+    document.getElementById("t-health-label").textContent = i18n.healthLabel;
+    document.getElementById("t-cap-label").textContent = i18n.capLabel;
+    document.getElementById("t-cycles-label").textContent = i18n.cyclesLabel;
+    document.getElementById("t-res-label").textContent = i18n.resLabel;
+    document.getElementById("t-factory-label").textContent = i18n.factoryLabel;
+    document.getElementById("t-audit-label").textContent = i18n.auditLabel;
+    document.getElementById("t-hash-label").textContent = i18n.hashLabel;
+    document.getElementById("t-footer").textContent = i18n.footer;
+    document.getElementById("t-play-link").textContent = i18n.playLink;
+
+    const loadingCard = document.getElementById("loading-card");
+    const errorCard = document.getElementById("error-card");
+    const resultCard = document.getElementById("result-card");
+    const certInput = document.getElementById("cert-input");
+
+    function showError(title, desc, isWarning = false) {
+      loadingCard.classList.add("hidden");
+      resultCard.classList.add("hidden");
+      errorCard.classList.remove("hidden");
+      const banner = document.getElementById("error-banner");
+      banner.className = `status-banner ${isWarning ? "warning" : "invalid"}`;
+      document.getElementById("error-title").textContent = title;
+      document.getElementById("error-desc").textContent = desc;
+    }
+
+    function renderCertificate(cert) {
+      loadingCard.classList.add("hidden");
+      errorCard.classList.add("hidden");
+      resultCard.classList.remove("hidden");
+
+      const manuf = (cert.manufacturer || "").toUpperCase();
+      const model = cert.device_model || "";
+      document.getElementById("res-device").textContent = `${manuf} ${model}`.trim() || "Smartphone";
+
+      let formattedDate = cert.created_at || "—";
+      try {
+        const d = new Date(cert.created_at);
+        if (!isNaN(d.getTime())) {
+          formattedDate = `${i18n.testedOn} ${d.toLocaleString(isFr ? "fr-FR" : "en-US", {
+            dateStyle: "medium",
+            timeStyle: "short"
+          })}`;
+        }
+      } catch (_) {}
+      document.getElementById("res-date").textContent = formattedDate;
+      document.getElementById("res-id").textContent = `ID: ${cert.cert_id}`;
+
+      const health = Math.max(0, Math.min(100, Number(cert.health_pct) || 0));
+      const healthEl = document.getElementById("res-health");
+      healthEl.textContent = `${health}%`;
+      healthEl.style.color = health >= 85 ? "var(--green)" : (health >= 75 ? "var(--orange)" : "var(--red)");
+      document.getElementById("res-health-bar").style.width = `${health}%`;
+
+      document.getElementById("res-cap").textContent = `${cert.measured_cap_mah} mAh`;
+      document.getElementById("res-factory").textContent = `${cert.factory_cap_mah} mAh`;
+      document.getElementById("res-cycles").textContent = Number(cert.cycles) > 0 ? `${cert.cycles}` : "N/A";
+      document.getElementById("res-ohm").textContent = `${cert.resistance_mohm} mΩ`;
+
+      const sealBadge = document.getElementById("res-seal-badge");
+      if (cert.seal_ok) {
+        sealBadge.className = "seal-badge ok";
+        sealBadge.textContent = `✓ ${i18n.sealOk}`;
+      } else {
+        sealBadge.className = "seal-badge warn";
+        sealBadge.textContent = `! ${i18n.sealWarn}`;
+      }
+
+      document.getElementById("res-audit").textContent =
+        (cert.audit_summary && cert.audit_summary.trim().length > 0)
+          ? cert.audit_summary
+          : i18n.noAudit;
+
+      document.getElementById("res-hash").textContent = cert.sha256_signature || "—";
+    }
+
+    async function verifyCertificate(rawId) {
+      const certId = (rawId || "").trim().toUpperCase();
+      certInput.value = certId;
+
+      if (!/^[A-Z0-9]{6,16}$/.test(certId)) {
+        showError(i18n.invalidIdTitle, i18n.invalidIdDesc, true);
+        return;
+      }
+
+      if (SUPABASE_URL.includes("VOTRE_") || SUPABASE_ANON_KEY.includes("VOTRE_")) {
+        showError(i18n.configTitle, i18n.configDesc, true);
+        return;
+      }
+
+      errorCard.classList.add("hidden");
+      resultCard.classList.add("hidden");
+      loadingCard.classList.remove("hidden");
+
+      try {
+        const cleanUrl = SUPABASE_URL.replace(/\/+$/, "");
+        const endpoint = `${cleanUrl}/rest/v1/resale_certificates?cert_id=eq.${encodeURIComponent(certId)}&select=*&limit=1`;
+        const resp = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Accept": "application/json"
+          }
+        });
+
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+
+        const rows = await resp.json();
+        if (!Array.isArray(rows) || rows.length === 0) {
+          showError(i18n.notFoundTitle, i18n.notFoundDesc, false);
+          return;
+        }
+
+        renderCertificate(rows[0]);
+      } catch (err) {
+        console.error("Verify error:", err);
+        showError(i18n.netErrorTitle, i18n.netErrorDesc, true);
+      }
+    }
+
+    document.getElementById("search-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = certInput.value.trim().toUpperCase();
+      if (id) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("id", id);
+        window.history.replaceState({}, "", url);
+        verifyCertificate(id);
+      }
+    });
+
+    // Auto-verify when opened via QR Code (?id=XXXXXXXX)
+    const params = new URLSearchParams(window.location.search);
+    const initialId = params.get("id");
+    if (initialId) {
+      verifyCertificate(initialId);
+    }
+  </script>
+</body>
+</html>
